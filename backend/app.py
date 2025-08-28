@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import psycopg2
 from psycopg2.extras import RealDictCursor
-# CHANGED (Line ~5): import `date` as well
 from datetime import datetime, date
 import os
 
@@ -11,7 +10,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 app = Flask(__name__)
 CORS(app)
 
-# (These are not used now, safe to keep or delete)
+
 DB_NAME = "nce_errors"
 DB_USER = "nce_errors_user"
 DB_PASSWORD = "PASTE_RENDERS_PASSWORD"
@@ -111,7 +110,7 @@ def create_error():
 
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
-            INSERT INTO public.sheet1_errors
+            INSERT INTO public.Sheet1_errors
             (error_description, category, customer_overview_type, error_date, error_count)
             VALUES (%s, %s, %s, %s, %s)
             RETURNING error_id;
@@ -141,7 +140,7 @@ def update_error(error_id):
 
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute("""
-            UPDATE public.sheet1_errors
+            UPDATE public.Sheet1_errors
             SET error_description = %s,
                 category = %s,
                 customer_overview_type = %s,
@@ -160,7 +159,7 @@ def update_error(error_id):
 @app.route("/api/errors/<int:error_id>", methods=["DELETE"])
 def delete_error(error_id):
     with get_conn() as conn, conn.cursor() as cur:
-        cur.execute("DELETE FROM public.sheet1_errors WHERE error_id = %s;", (error_id,))
+        cur.execute("DELETE FROM public.Sheet1_errors WHERE error_id = %s;", (error_id,))
         rows = cur.rowcount
         conn.commit()
 
