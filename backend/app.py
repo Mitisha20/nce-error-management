@@ -3,6 +3,9 @@ from flask_cors import CORS
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
+import os 
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 app = Flask(__name__)
 CORS(app)  
@@ -16,10 +19,7 @@ DB_PORT = "5432"
 
 def get_conn():
     
-    return psycopg2.connect(
-        dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD,
-        host=DB_HOST, port=DB_PORT, sslmode="require"
-    )
+    return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 def required_fields_present(d):
     required = ["error_description", "category", "customer_overview_type", "error_date", "error_count"]
