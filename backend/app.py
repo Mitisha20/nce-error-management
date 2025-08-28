@@ -10,14 +10,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 app = Flask(__name__)
 CORS(app)
 
-# (These constants aren’t used anymore; safe to keep or delete)
 DB_NAME = "nce_errors"
 DB_USER = "nce_errors_user"
 DB_PASSWORD = "PASTE_RENDERS_PASSWORD"
 DB_HOST = "dpg-xxxx.oregon-postgres.render.com"
 DB_PORT = "5432"
 
-# ---------- helper: accept multiple date formats ----------
+# ---------- accept multiple date formats ----------
 def parse_date_any(s: str) -> date:
     s = str(s).strip()[:10]
     for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y"):
@@ -27,7 +26,7 @@ def parse_date_any(s: str) -> date:
             pass
     raise ValueError("bad date format")
 
-# ---------- helper: short db error text ----------
+# ---------- short db error text ----------
 def _db_err(e):
     return getattr(getattr(e, "diag", None), "message_primary", None) or str(e)
 
@@ -50,16 +49,16 @@ def list_errors():
     offset = (page - 1) * limit
 
     with get_conn() as conn, conn.cursor(cursor_factory=RealDictCursor) as cur:
-        # CHANGED: quote the table name
+      
         cur.execute('SELECT COUNT(*) AS cnt FROM public."Sheet1_errors";')
         total = cur.fetchone()["cnt"]
 
-        # CHANGED: quote the table name
+        
         cur.execute(
             '''
             SELECT error_id, error_description, category, customer_overview_type, error_date, error_count
             FROM public."Sheet1_errors"
-            ORDER BY error_id
+            ORDER BY error_id desc
             LIMIT %s OFFSET %s;
             ''',
             (limit, offset),
@@ -76,7 +75,7 @@ def list_errors():
 @app.route("/api/errors/<int:error_id>", methods=["GET"])
 def get_error(error_id):
     with get_conn() as conn, conn.cursor(cursor_factory=RealDictCursor) as cur:
-        # CHANGED: quote the table name
+        
         cur.execute(
             '''
             SELECT error_id, error_description, category, customer_overview_type, error_date, error_count
@@ -113,7 +112,7 @@ def create_error():
 
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            # CHANGED: quote the table name
+            
             cur.execute(
                 '''
                 INSERT INTO public."Sheet1_errors"
@@ -152,7 +151,7 @@ def update_error(error_id):
 
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            # CHANGED: quote the table name
+            
             cur.execute(
                 '''
                 UPDATE public."Sheet1_errors"
@@ -183,7 +182,7 @@ def update_error(error_id):
 def delete_error(error_id):
     try:
         with get_conn() as conn, conn.cursor() as cur:
-            # CHANGED: quote the table name
+           
             cur.execute('DELETE FROM public."Sheet1_errors" WHERE error_id = %s;', (error_id,))
             rows = cur.rowcount
             conn.commit()
