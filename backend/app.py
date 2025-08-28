@@ -2,23 +2,34 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from datetime import datetime
-import os 
+# CHANGED (Line ~5): import `date` as well
+from datetime import datetime, date
+import os
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app)
 
-# ---------- config ----------
-DB_NAME = "nce_errors"               
-DB_USER = "nce_errors_user"            
-DB_PASSWORD = "PASTE_RENDERS_PASSWORD" 
-DB_HOST = "dpg-xxxx.oregon-postgres.render.com"  
-DB_PORT = "5432"                       
+# (These are not used now, safe to keep or delete)
+DB_NAME = "nce_errors"
+DB_USER = "nce_errors_user"
+DB_PASSWORD = "PASTE_RENDERS_PASSWORD"
+DB_HOST = "dpg-xxxx.oregon-postgres.render.com"
+DB_PORT = "5432"
+
+
+def parse_date_any(s: str) -> date:
+    """Try YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY; raise ValueError if none match."""
+    s = str(s).strip()[:10]  
+    for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            pass
+    raise ValueError("bad date format")
 
 def get_conn():
-    
     return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 def required_fields_present(d):
@@ -87,12 +98,11 @@ def create_error():
     if not required_fields_present(data):
         return jsonify({"error": "Missing required fields"}), 400
 
-    # Parse and validate date
+    
     try:
-        
-        dt = datetime.strptime(data["error_date"], "%d-%m-%Y").date()
+        dt = parse_date_any(data["error_date"])
     except ValueError:
-        return jsonify({"error": "error_date must be DD-MM-YYY"}), 400
+        return jsonify({"error": "error_date must be one of: YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY"}), 400
 
     try:
         count = int(data["error_count"])
@@ -118,10 +128,11 @@ def update_error(error_id):
     if not required_fields_present(data):
         return jsonify({"error": "Missing required fields"}), 400
 
+    
     try:
-        dt = datetime.strptime(data["error_date"], "%Y-%m-%d").date()
+        dt = parse_date_any(data["error_date"])
     except ValueError:
-        return jsonify({"error": "error_date must be YYYY-MM-DD"}), 400
+        return jsonify({"error": "error_date must be one of: YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY"}), 400
 
     try:
         count = int(data["error_count"])
