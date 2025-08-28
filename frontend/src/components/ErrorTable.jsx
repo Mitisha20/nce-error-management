@@ -1,65 +1,109 @@
 import React from 'react'
 
-const table = { width: '100%', borderCollapse: 'collapse', marginTop: 10 }
-const cell = { border: '1px solid #ddd', padding: 8, textAlign: 'left', verticalAlign: 'top' }
-const th = { ...cell, background: '#eee', fontWeight: 'bold' }
+const tableWrap = { overflowX: 'auto' }
+const table = { width: '100%', borderCollapse: 'collapse', marginTop: 10, border: '1px solid #dcdcdc' }
+const th = { padding: '10px 8px', border: '1px solid #d0d0d0', background: '#f1f1f1', textAlign: 'left' }
+const td = { padding: '10px 8px', border: '1px solid #e1e1e1', verticalAlign: 'top' }
 
-const btn = { padding: '6px 10px', border: 0, borderRadius: 4, cursor: 'pointer', fontWeight: 'bold', marginRight: 6 }
-const editBtn = { ...btn, background: '#ffc107', color: '#333' }
-const delBtn = { ...btn, background: '#dc3545', color: '#fff' }
+const btn = {
+  padding: '8px 12px',
+  borderRadius: 6,
+  border: '1px solid #d0d0d0',
+  background: '#fafafa',
+  cursor: 'pointer',
+  marginRight: 8
+}
+const btnWarn = { ...btn, background: '#ffe9b0' }
+const btnDanger = { ...btn, background: '#ffd2d2' }
 
-const pagWrap = { display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 14, flexWrap: 'wrap' }
-const pgBtn = { padding: '6px 10px', margin: 4, border: '1px solid #ddd', borderRadius: 4, background: '#f8f8f8', cursor: 'pointer' }
-const pgBtnActive = { ...pgBtn, background: '#007bff', color: '#fff', fontWeight: 'bold' }
+const pagerWrap = { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, flexWrap: 'wrap' }
+const pageBtn = { ...btn, padding: '6px 10px' }
+const pageBtnActive = { ...pageBtn, background: '#007bff', color: '#fff', borderColor: '#007bff' }
 
 export default function ErrorTable({ items, page, limit, total, goToPage, handleEdit, handleDelete }) {
-  const totalPages = Math.max(1, Math.ceil(total / limit))
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
+  const totalPages = Math.max(1, Math.ceil((total || 0) / (limit || 10)))
+
+  
+  const nums = []
+  const start = Math.max(1, page - 2)
+  const end = Math.min(totalPages, page + 2)
+  for (let i = start; i <= end; i++) nums.push(i)
 
   return (
     <>
       <h2 style={{ textAlign: 'center', marginBottom: 10 }}>Existing Error Records</h2>
 
-      <table style={table}>
-        <thead>
-          <tr>
-            <th style={th}>ID</th>
-            <th style={th}>Description</th>
-            <th style={th}>Category</th>
-            <th style={th}>Type</th>
-            <th style={th}>Date</th>
-            <th style={th}>Count</th>
-            <th style={th}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map(row => (
-            <tr key={row.error_id}>
-              <td style={cell}>{row.error_id}</td>
-              <td style={cell}>{row.error_description}</td>
-              <td style={cell}>{row.category}</td>
-              <td style={cell}>{row.customer_overview_type}</td>
-              <td style={cell}>{String(row.error_date).slice(0,10)}</td>
-              <td style={cell}>{row.error_count}</td>
-              <td style={cell}>
-                <button style={editBtn} onClick={() => handleEdit(row)}>Edit</button>
-                <button style={delBtn} onClick={() => handleDelete(row.error_id)}>Delete</button>
-              </td>
+      <div style={tableWrap}>
+        <table style={table}>
+          <thead>
+            <tr>
+              <th style={th}>ID</th>
+              <th style={th}>Description</th>
+              <th style={th}>Category</th>
+              <th style={th}>Type</th>
+              <th style={th}>Date</th>
+              <th style={th}>Count</th>
+              <th style={th}>Actions</th>
             </tr>
-          ))}
-          {items.length === 0 && (
-            <tr><td colSpan="7" style={{ ...cell, textAlign: 'center' }}>No records</td></tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ ...td, textAlign: 'center' }}>No records</td>
+              </tr>
+            ) : (
+              items.map(row => (
+                <tr key={row.error_id}>
+                  <td style={td}>{row.error_id}</td>
+                  <td style={td}>{row.error_description}</td>
+                  <td style={td}>{row.category}</td>
+                  <td style={td}>{row.customer_overview_type}</td>
+                  <td style={td}>{row.error_date}</td>
+                  <td style={td}>{row.error_count}</td>
+                  <td style={td}>
+                    <button style={btnWarn} onClick={() => handleEdit(row)}>Edit</button>
+                    <button style={btnDanger} onClick={() => handleDelete(row.error_id)}>Delete</button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      <div style={pagWrap}>
-        <button style={pgBtn} onClick={() => goToPage(page - 1)} disabled={page <= 1}>Previous</button>
-        {pages.map(n => (
-          <button key={n} style={n === page ? pgBtnActive : pgBtn} onClick={() => goToPage(n)}>{n}</button>
+      {/* Pagination controls */}
+      <div style={pagerWrap}>
+        <button
+          style={btn}
+          onClick={() => goToPage(page - 1)}
+          disabled={page <= 1}
+          title="Previous page"
+        >
+          ◀ Previous
+        </button>
+
+        {nums.map(n => (
+          <button
+            key={n}
+            style={n === page ? pageBtnActive : pageBtn}
+            onClick={() => goToPage(n)}
+          >
+            {n}
+          </button>
         ))}
-        <button style={pgBtn} onClick={() => goToPage(page + 1)} disabled={page >= totalPages}>Next</button>
-        <span style={{ marginLeft: 8 }}>Page {page} of {totalPages} (Total: {total})</span>
+
+        <button
+          style={btn}
+          onClick={() => goToPage(page + 1)}
+          disabled={page >= totalPages}
+          title="Next page"
+        >
+          Next ▶
+        </button>
+
+        <span style={{ marginLeft: 8, fontSize: 13, color: '#555' }}>
+          Page {page} of {totalPages} &nbsp;|&nbsp; {limit} per page &nbsp;|&nbsp; Total {total}
+        </span>
       </div>
     </>
   )

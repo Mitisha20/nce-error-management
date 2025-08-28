@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from 'react'
 import ErrorForm from './components/ErrorForm.jsx'
 import ErrorTable from './components/ErrorTable.jsx'
+
+// use var in deployment and localhost in dev
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:5000';
 
 
-const appStyles = { fontFamily: 'Arial, sans-serif', padding: 20, background: '#f4f4f4', minHeight: '100vh' }
+const appStyles = { fontFamily: 'Poppins, sans-serif', padding: 20, background: '#f4f4f4', minHeight: '100vh' }
 const headerStyles = { color: '#333', textAlign: 'center', marginBottom: 20 }
 const card = { background: '#fff', padding: 20, borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: 20 }
 const errorText = { color: 'red', textAlign: 'center', fontWeight: 'bold' }
+
+
+const headerWrap = { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 20 }
+const logoStyles = { height: 40, width: 40, objectFit: 'contain' }
+const titleStyles = { color: '#333', margin: 0 }
+
 
 export default function App() {
   // data + ui state
   const [items, setItems] = useState([])              
   const [total, setTotal] = useState(0)               
   const [page, setPage] = useState(1)                 
-  const [limit] = useState(20)                        
+  const [limit] = useState(10)                        
   const [loading, setLoading] = useState(true)
   const [errMsg, setErrMsg] = useState('')
 
@@ -136,7 +144,10 @@ export default function App() {
 
   return (
     <div style={appStyles}>
-      <h1 style={headerStyles}>NCE Error Management</h1>
+      <div style={headerWrap}>
+        <img src="/computer.png" alt="Logo" style={logoStyles} />
+        <h1 style={titleStyles}>Error Management Dashboard</h1>
+      </div>
 
       {errMsg && <div style={errorText}>{errMsg}</div>}
       {loading && <div style={{ textAlign: 'center', marginBottom: 10 }}>Loading…</div>}
