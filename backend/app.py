@@ -90,9 +90,9 @@ def create_error():
     # Parse and validate date
     try:
         
-        dt = datetime.strptime(data["error_date"], "%Y-%m-%d").date()
+        dt = datetime.strptime(data["error_date"], "%d-%m-%Y").date()
     except ValueError:
-        return jsonify({"error": "error_date must be YYYY-MM-DD"}), 400
+        return jsonify({"error": "error_date must be DD-MM-YYY"}), 400
 
     try:
         count = int(data["error_count"])
