@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import ErrorForm from './components/ErrorForm.jsx'
 import ErrorTable from './components/ErrorTable.jsx'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:5000';
 
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:5000'
 
 const appStyles = { fontFamily: 'Arial, sans-serif', padding: 20, background: '#f4f4f4', minHeight: '100vh' }
 const headerStyles = { color: '#333', textAlign: 'center', marginBottom: 20 }
@@ -33,7 +32,8 @@ export default function App() {
     try {
       setLoading(true)
       setErrMsg('')
-      const res = await fetch(`${API_BASE}/api/errors?page=${p}&limit=${limit}`)
+      const res = await fetch(`${API_BASE}/api/errors?page=${p}&limit=${limit}`);
+
       if (!res.ok) {
         const e = await res.json().catch(() => ({}))
         throw new Error(e.error || `HTTP ${res.status}`)
